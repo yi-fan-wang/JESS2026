@@ -32,7 +32,7 @@
 \fancyhf{} % Clear default settings
 \lhead{\coursename}                     % Left header: course name
 %\chead{\leftmark}                        % Center header: current lecture title (set by \markboth)
-\rhead{\lecturer}                         % Right header: lecturer
+%\rhead{\lecturer}                         % Right header: lecturer
 \cfoot{\thepage}                          % Center footer: page number
 \renewcommand{\headrulewidth}{0.4pt}      % Width of header rule
 \renewcommand{\footrulewidth}{0pt}        % No footer rule
@@ -109,7 +109,7 @@
 \clearpage
 
 % ------------------------- First Lecture Example -------------------------
-\lecture{General Introduction to Digital Signal Processing}{(30min)}
+\lecture{General Introduction to Digital Signal Processing}{}
 
 Opening remarks: The GW170817 sky map.
 
@@ -186,7 +186,7 @@ Probability is a measure of the likelihood that an event will occur. It is quant
 \begin{definition}[Kolmogorov axioms]
     The probability measure $P$ on a sample space $\Omega$ satisfies the following axioms:
     \begin{itemize}
-        \item NoN-negativity: $P(A) \geq 0$ for any event $A \subseteq \Omega$.
+        \item Non-negativity: $P(A) \geq 0$ for any event $A \subseteq \Omega$.
         \item Normalization: $P(\Omega) = 1$.
         \item Additivity: For any countable sequence of mutually exclusive events $A_1, A_2, A_3, ...$, we have $P\left(\bigcup_{i=1}^{\infty} A_i\right) = \sum_{i=1}^{\infty} P(A_i)$.
     \end{itemize}
@@ -274,9 +274,9 @@ The likelihood for GW parameter estimation is called Whittle Likelihood, it's de
 
 A multi-variable Gaussian distribution is given by:
 \begin{equation}
-    P(\mathbf{n}) = \frac{1}{(2\pi)^{n/2} |\Sigma|^{1/2}} \exp\left(-\frac{1}{2} (\mathbf{n}-\boldsymbol{\mu})^T \Sigma^{-1} (\mathbf{n}-\boldsymbol{\mu})\right)
+    P(\mathbf{n}) = \frac{1}{(2\pi)^{N/2} |\Sigma|^{1/2}} \exp\left(-\frac{1}{2} (\mathbf{n}-\boldsymbol{\mu})^T \Sigma^{-1} (\mathbf{n}-\boldsymbol{\mu})\right)
 \end{equation}
-where $\mathbf{n}$ is an $n$-dimensional random vector, $\boldsymbol{\mu}$ is the mean vector, and $\Sigma$ is the covariance matrix. Approximate $n(t)$ as a stationary Gaussian random process with zero mean, which is a good approximation for LIGO noise. 
+where $\mathbf{n}$ is an $N$-dimensional random vector, $\boldsymbol{\mu}$ is the mean vector, and $\Sigma$ is the covariance matrix. Approximate $n(t)$ as a stationary Gaussian random process with zero mean $\mu=0$, which is a good approximation for LIGO noise. 
 
 For a stationary Gaussian random process, the covariance matrix is Toeplitz, which means that the covariance between two points depends only on the time difference between them. Writing it down in a discrete form:
 \begin{equation}
@@ -324,7 +324,7 @@ where $c_n = \Sigma(n \Delta t)$ for $n = 0, 1, ..., M-1$, and determined by sym
     where each row is a cyclic shift of the first row $(c_0, c_1, \dots, c_{N-1})$. 
     Define the Fourier matrix $\mathbf{F}$ with entries
     \[
-    \mathbf{F}_{jk} = \frac{1}{\sqrt{n}} \, e^{2\pi i jk / N}, \qquad j,k = 0,1,\dots,N-1.
+    \mathbf{F}_{jk} = \frac{1}{\sqrt{N}} \, e^{2\pi i jk / N}, \qquad j,k = 0,1,\dots,N-1.
     \]
     Then $\mathbf{C}$ is diagonalized by $\mathbf{F}$:
     \[
@@ -332,11 +332,11 @@ where $c_n = \Sigma(n \Delta t)$ for $n = 0, 1, ..., M-1$, and determined by sym
     \]
     where $\mathbf{F}^*$ is the conjugate transpose of $\mathbf{F}$, and $\mathbf{\Lambda} = \operatorname{diag}(\lambda_0, \lambda_1, \dots, \lambda_{N-1})$ is a diagonal matrix whose entries are the eigenvalues of $\mathbf{C}$. The eigenvalues are given by the discrete Fourier transform of the first row:
     \[
-    \lambda_k = \sum_{j=0}^{N-1} c_j \, e^{-2\pi i jk / n}, \qquad k = 0,1,\dots,N-1.
+    \lambda_k = \sum_{j=0}^{N-1} c_j \, e^{-2\pi i jk / N}, \qquad k = 0,1,\dots,N-1.
     \]
     Equivalently, the eigenvectors of $\mathbf{C}$ are the Fourier basis vectors
     \[
-    \mathbf{v}_k = \frac{1}{\sqrt{n}} \big(1, e^{2\pi i k/n}, e^{4\pi i k/n}, \dots, e^{2\pi i (N-1)k/n} \big)^\top,
+    \mathbf{v}_k = \frac{1}{\sqrt{N}} \big(1, e^{2\pi i k/N}, e^{4\pi i k/N}, \dots, e^{2\pi i (N-1)k/N} \big)^\top,
     \]
     with corresponding eigenvalues $\lambda_k$.
     \end{theorem}
@@ -364,6 +364,12 @@ where $c_n = \Sigma(n \Delta t)$ for $n = 0, 1, ..., M-1$, and determined by sym
     \begin{remark}
     For real-valued processes, $R(\tau)$ is even and $S(f)$ is real and even (two-sided spectrum). In physical applications, it is common to work with the one-sided PSD $S_n(f) = 2S(f)$ for $f > 0$, which represents the power contributed by positive frequencies only.
     \end{remark}
+
+Therefore we can simplify the likelihood by working in frequency domain. $n^T \Sigma^{-1} n = n^T F^T (F^T)^{-1} \Sigma^{-1} F^{-1} F n = \tilde{n}^T \Lambda^{-1} \tilde{n}$, where $\tilde{n} = F n$ is the discrete Fourier transform of $n$. The likelihood becomes
+    \begin{equation}
+        P(\tilde{\mathbf{n}}) = \frac{1}{(2\pi)^{N/2} |\Lambda|^{1/2}} \exp\left(-\frac{1}{2} \tilde{\mathbf{n}}^T \Lambda^{-1} \tilde{\mathbf{n}}\right)
+    \end{equation}
+
 
 As a consequence, the likelihood can be written in the frequency domain as:
 \[
@@ -402,7 +408,9 @@ where $\pi(\theta)$ is the prior distribution of the parameters, which encodes o
 
 \subsection*{Computing the likelihood, sampling method}
 
-The likelihood is usually a function of many parameters, as many as 15 parameters for binary black hole mergers. In such a high dimensional parameter space, it is impossible to compute the likelihood on a grid. Instead, we use sampling methods, such as Markov Chain Monte Carlo (MCMC) or Nested Sampling, to explore the parameter space and estimate the posterior distribution of the parameters given the data.
+For quasi-circular binary black hole waveforms, there are 15 dimensional parameter space: 2 masses, 6 spin components, 3 sky locations (distance, right ascension, declination), and 2 orientations, 1 polarization and 1 time. Another 2 if considering eccentricity (eccentricity and anomaly).
+
+In such a high dimensional parameter space, it is impossible to compute the likelihood on a grid. Instead, we use sampling methods, such as Markov Chain Monte Carlo (MCMC) or Nested Sampling, to explore the parameter space and estimate the posterior distribution of the parameters given the data.
 
 For more details, check afternoon's exercise class.
 
@@ -419,6 +427,10 @@ Corner plots are commonly used to visualize the posterior distribution of parame
 
 \subsection*{Bayesian Model Selection}
 
+Write the Bayes formula again but this time with $H$ explicitly
+\begin{equation}
+    P(\theta|d, H) = \frac{P(d|\theta, H) P(\theta|H)}{P(d|H)}
+\end{equation}
 We can compare the goodness of two models by computing their Bayes factor. For examples, compare GR and a modified Gravitational theory.
 
 \begin{equation}
@@ -452,7 +464,9 @@ Bayes factor automatically penalizes models with more parameters.
 Consistent with intuition that $H_0$ is totally excluded if $\theta_0$ is excluded. The Occam Razor is represented by the prior volume at the cost of introducing one more parameters.
 
 \begin{example}
-    Massive graviton
+    Massive graviton: $H_0$: $m_g = 0$ (GR), $H_1$: $m_g > 0$ (modified gravity). The Bayes factor is the ratio of the posterior and prior at $m_g = 0$. If the posterior at $m_g = 0$ is much smaller than the prior, then GR is disfavored.
+
+    The modification from massive graviton is a frequency dependent dispersion relation: $E^2 = p^2 c^2 + m_g^2 c^4$,  $\Phi_\mathrm{MG}(f) = -\frac{\pi D m_g^2}{(1+z) f}$, where $D$ is the distance to the source and $z$ is the redshift. 
 \end{example}
 
 \subsection*{Maximum likelihood and Fisher Information Matrix}
@@ -543,9 +557,9 @@ $s(t) = h(t) + n(t)$
 \begin{equation}
     \frac{1}{T} \int_{0}^{T} s(t) h(t) dt = \frac{1}{T} \int_{0}^{T} h(t)^2 dt + \frac{1}{T} \int_{0}^{T} n(t) h(t) dt \rightarrow h_0^2  > \left(\frac{\tau_0}{T}\right)^{1/2} h_0 n_0
 \end{equation}
-where $h_0$ is the amplitude of the signal, $n_0$ is the amplitude of the noise, and $\tau_0$ is the correlation time of the noise and signal. Therefore, we can detect the signal if $h_0 > \left(\frac{\tau_0}{T}\right)^{1/2} n_0$. The longer we observe, the smaller the signal we can detect.
+where $h_0$ is the amplitude of the signal, $n_0$ is the amplitude of the noise, and $f_0$ is the frequency of the noise times signal. $T/f$ is the number of steps of that random walk. Therefore, we can detect the signal if $h_0 > \left(\frac{1}{f_0T}\right)^{1/2} n_0$. The longer we observe, the smaller the signal we can detect.
 
-For $\tau_0 = 1e-3$ s, $n_0 = 1e-21$, and $T = 1$ year, we can detect a signal with amplitude as small as $h_0 \sim 10^{-26}$.
+For $f_0 = 100$ s, $n_0 = 1e-21$, and $T = 1$ year, we can detect a signal with amplitude as small as $h_0 \sim 10^{-26}$.
 
 Define 
 \begin{equation}
@@ -557,19 +571,22 @@ where $K(t)$ is the filter function. The SNR is defined as
 \end{equation}
 
 \begin{align}
-    N^2= \langle \hat{s}^2 \rangle|_{h=0} =  \int_{-\infty}^{\infty} dt \int_{-\infty}^{\infty} dt' K(t) K(t') \langle n(t) n(t') \rangle = \\ \nonumber
+    N^2= \langle \hat{s}^2 \rangle|_{h=0} -\langle \hat{s} \rangle^2|_{h=0} (=0) =  \int_{-\infty}^{\infty} dt \int_{-\infty}^{\infty} dt' K(t) K(t') \langle n(t) n(t') \rangle = \\ \nonumber
     \int_{-\infty}^{\infty} dt dt'K(t) K(t') \int_{-\infty}^{\infty} df df'e^{2\pi ift - 2\pi if't' }\langle \hat{n}^\ast(f)\hat{n}(f') \rangle =  \\ \nonumber
     \int_{-\infty}^{\infty}df \frac{1}{2} S_n(f) |\hat{K}(f)|^2
 \end{align}
+Last line because $\hat{K}(f) = \int_{-\infty}^{\infty} dt K(t) e^{-2\pi i f t}$ is the Fourier transform of $K(t)$, and $\langle \hat{n}^\ast(f)\hat{n}(f') \rangle = \frac{1}{2} S_n(f) \delta(f-f')$ for stationary Gaussian noise.
 
 Therefore
 \begin{equation}
     \frac{S}{N} = \frac{\int_{-\infty}^{\infty} df \tilde{h}(f) \hat{K}^\ast(f)}{\sqrt{\int_{-\infty}^{\infty} df \frac{1}{2} S_n(f) |\hat{K}(f)|^2}}
 \end{equation}
 
+Adding a term $\frac{1}{2}S_n(f)$ both on the numerator and denominator (by multipling it then dividing it) in the above equation.
 Define the inner product
 \begin{equation}
-    \langle a, b \rangle = 4 \Re \left[ \int_{0}^{\infty} \frac{\tilde{a}^\ast(f) \tilde{b}(f)}{S_n(f)} df \right]
+    \langle a, b \rangle =  \int_{-\infty}^{\infty} \frac{\tilde{a}^\ast(f) \tilde{b}(f)}{\frac{1}{2}S_n(f)} df  = 
+    4 \Re \left[ \int_{0}^{\infty} \frac{\tilde{a}^\ast(f) \tilde{b}(f)}{S_n(f)} df \right]
 \end{equation}
 The SNR can be written as
 \begin{equation}
@@ -587,6 +604,18 @@ The equality holds when $K$ is proportional to $h$, i.e., $K = \alpha h$ for som
 \begin{equation}
     \hat{K}(f) = \alpha \frac{\tilde{h}(f)}{S_n(f)}
 \end{equation}
+This is called Weiner filter. 
+
+\begin{remark}
+    The matched-filtering SNR is then given by 
+    \begin{equation}
+        \frac{S}{N} = \frac{\langle d, h \rangle}{\sqrt{\langle h, h \rangle}} = 4 \Re \left[ \int_{0}^{\infty} \frac{\tilde{d}(f)\bar{\tilde{h}}^\ast(f)}{S_n(f)} df \right]
+    \end{equation}
+\end{remark}
+\begin{remark}
+    Optimal SNR = $\sqrt{\langle h, h \rangle} = \sqrt{4 \Re\int_0^\infty \frac{|\tilde{h}(f)|^2}{S_n(f)} df}$. This is the SNR we get when we know the true parameters of the signal. In practice, we don't know the true parameters, so we have to search over a template bank of possible waveforms, which leads to a reduction in the effective SNR due to the mismatch between the true signal and the templates.
+\end{remark}
+
 
 \subsection*{Relation to maximum likelihood estimation}
 The matched-filtering SNR can be related to the maximum likelihood estimation of the signal parameters. The likelihood function for a signal $h(\theta)$ in the presence of noise $n$ is given by
@@ -594,14 +623,19 @@ The matched-filtering SNR can be related to the maximum likelihood estimation of
     \mathcal{L}(\theta) = P(d|h(\theta)) \propto \exp\left(-\frac{1}{2} \langle d - h(\theta), d - h(\theta) \rangle\right)
 \end{equation}
 
-Maximizing the likelihood is equivalent to minimizing the inner product $\langle d - h(\theta), d - h(\theta) \rangle$. The matched-filtering SNR can be expressed in terms of the likelihood as
-\begin{equation}
-    \frac{S}{N} = \sqrt{2 \log \mathcal{L}(\theta) + \text{const}}      
-\end{equation}
+$h(\theta) = A \bar{h}(\theta)$. 
 
-\begin{remark}
-    Optimal SNR = 4 Re$\int_0^\infty \frac{|\tilde{h}(f)|^2}{S_n(f)} df$. This is the SNR we get when we know the true parameters of the signal. In practice, we don't know the true parameters, so we have to search over a template bank of possible waveforms, which leads to a reduction in the effective SNR due to the mismatch between the true signal and the templates.
-\end{remark}
+\[
+    \frac{\partial \log \Lambda(\theta)}{\partial A}
+    = \langle d, \bar{h}(\theta) \rangle - A \langle \bar{h}(\theta), \bar{h}(\theta) \rangle = 0
+    \]
+
+\[ A = \frac{\langle d, \bar{h}(\theta) \rangle}{\langle \bar{h}(\theta), \bar{h}(\theta) \rangle} \]
+
+\[ \log \Lambda(\theta)|_{Max over A} = \frac{1}{2} \frac{\langle d, \bar{h}(\theta) \rangle^2}{\langle \bar{h}(\theta), \bar{h}(\theta) \rangle} = \frac{1}{2} \left( \frac{S}{N} \right)^2    \]
+
+where $\Lambda(\theta) = \frac{\mathcal{L}(\theta)}{\mathcal{L}(0)}$ is the likelihood ratio between the signal hypothesis and the noise-only hypothesis.
+
 
 \subsection*{Hypothesis Testing and Neymann-Pearson lemma}
 Hypothesis testing is a statistical method used to decide between two competing hypotheses based on observed data. In the context of signal detection, we often want to test the null hypothesis $H_0$ (no signal, only noise) against the alternative hypothesis $H_1$ (signal present).
@@ -613,10 +647,16 @@ Hypothesis testing is a statistical method used to decide between two competing 
 
 The Neymann-Pearson lemma states that for a given significance level $\alpha$, the most powerful test for distinguishing between two simple hypotheses $H_0$ and $H_1$ is the likelihood ratio test, which rejects $H_0$ in favor of $H_1$ if the likelihood ratio $\Lambda(d) = \frac{P(d|H_1)}{P(d|H_0)}$ exceeds a certain threshold $\eta$. The threshold $\eta$ is chosen such that the probability of a Type I error (rejecting $H_0$ when it is true) is equal to $\alpha$.
 
+Type I error: $P(\Lambda(d) > \eta | H_0) = \alpha$ (false positive)
+
+Type II error: $P(\Lambda(d) \leq \eta | H_1) = \beta$ (false negative)
+
+The meaning of the most powerful test is that it has the highest probability of correctly rejecting $H_0$ when $H_1$ is true (i.e., it maximizes the power of the test, which is $1 - \beta$, where $\beta$ is the probability of a Type II error).
+
 \subsection*{Search for GW signals}
 In long term, the noise is not Gaussian, they're called glitches. In practice, we build a large template bank of waveforms that cover the parameter space of interest, and then we compute the matched-filtering SNR for each template against the observed data. We set a threshold on the SNR to identify candidate events, and then we perform further analysis to determine whether these candidates are consistent with being true GW signals or are likely to be noise artifacts. Such as chi-square discriminators. The coincidences are formed from at least two detectors. Time shift is used to construct background distribution. The false alarm rate (FAR) is estimated from the background distribution, and we set a threshold on FAR to claim a detection, such as 1/100 years.
 
-\subsection*{$\chi^2$ distribution}
+\subsection*{$\chi^2$ distribution, Goodness of fitting, and new-SNR}
 Suppose we haeve two independent random variables $X$ and $Y$ that are normally distributed with mean 0 and variance 1, i.e., $X \sim N(0,1)$ and $Y \sim N(0,1)$. Then the random variable defined as
 \begin{equation}
     Z = X^2 + Y^2
@@ -653,9 +693,12 @@ The false alarm rate (FAR) is the expected number of false positives (incorrectl
 
 In gravitational wave, we time shift the data from different detectors to create a background distribution of noise events, which allows us to estimate the FAR for candidate events. A common threshold for claiming a detection is a FAR of less than 1 per 100 years, which corresponds to a very low probability of a false positive.
 
-
-
-
-
+\subsection*{Procedure for searching for GW signals}
+\begin{itemize}
+    \item Build a template bank of waveforms that cover the parameter space of interest.
+    \item Compute the matched-filtering SNR for each template against the observed data.
+    \item Looking for coincidence of multiple detector triggers
+    \item Use time shifts to construct a background distribution and estimate the false alarm rate (FAR) for candidate events.
+\end{itemize}
 
 \end{document}
