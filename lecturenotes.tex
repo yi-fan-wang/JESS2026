@@ -1,0 +1,619 @@
+% !TeX program = XeLaTeX
+% A LaTeX template for lecture notes (English)
+\documentclass[12pt, a4paper]{article}
+
+% ------------------------- Basic Packages -------------------------
+\usepackage{geometry}           % Page layout
+\usepackage{fancyhdr}           % Headers and footers
+\usepackage{amsmath, amssymb}   % Math symbols and equations
+\usepackage{amsthm}             % Theorem environments
+\usepackage{graphicx}           % Insert images
+\usepackage{hyperref}           % Hyperlinks
+\usepackage{xcolor}             % Colors (for links)
+\usepackage{enumitem}           % Custom lists
+\usepackage[bottom]{footmisc}   % Footnotes position
+
+% ------------------------- Page Geometry -------------------------
+\geometry{
+    top=2.5cm,
+    bottom=2.5cm,
+    left=2.5cm,
+    right=2.5cm,
+    headheight=15pt,
+    footskip=1cm
+}
+
+% ------------------------- Header and Footer -------------------------
+% Customize these commands with your course and lecturer information
+\newcommand{\coursename}{Gravitational Wave Data Analysis}
+\newcommand{\lecturer}{Yifan Wang}
+
+\pagestyle{fancy}
+\fancyhf{} % Clear default settings
+\lhead{\coursename}                     % Left header: course name
+%\chead{\leftmark}                        % Center header: current lecture title (set by \markboth)
+\rhead{\lecturer}                         % Right header: lecturer
+\cfoot{\thepage}                          % Center footer: page number
+\renewcommand{\headrulewidth}{0.4pt}      % Width of header rule
+\renewcommand{\footrulewidth}{0pt}        % No footer rule
+
+% ------------------------- Hyperlink Setup -------------------------
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue,
+    bookmarksopen=true,
+    bookmarksnumbered=true,
+    pdftitle={Lecture Notes},
+    pdfauthor={Your Name}
+}
+
+% ------------------------- Paragraph Format -------------------------
+\setlength{\parindent}{0pt}      % No indentation at paragraph start
+\setlength{\parskip}{6pt}        % Vertical space between paragraphs
+
+% ------------------------- Lecture Counter and Command -------------------------
+\newcounter{lecture}              % Lecture counter
+\setcounter{lecture}{0}
+
+% \lecture{Title}{Date}  or  \lecture[Subtitle]{Title}{Date}
+\newcommand{\lecture}[3][]{%
+    \refstepcounter{lecture}%
+    \section*{Lecture \thelecture: #2%
+        \ifx\relax#1\relax\else\ (#1)\fi}%
+    \markboth{Lecture \thelecture: #2}{Lecture \thelecture: #2}%
+    \addcontentsline{toc}{section}{Lecture \thelecture: #2}%
+    \vspace{1ex}\hfill\textit{#3}\hfill\vspace{2ex}%
+    %\@afterindentfalse\@afterheading % Prevent paragraph indentation after the heading
+}
+
+% ------------------------- Theorem Environments -------------------------
+% Using amsthm to define theorem styles
+\theoremstyle{plain} % Theorems, lemmas, corollaries, propositions
+\newtheorem{theorem}{Theorem}[lecture]      % Numbering depends on lecture counter
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition} % Definitions, examples, remarks
+\newtheorem{definition}{Definition}[lecture]
+\newtheorem{example}{Example}[lecture]
+\newtheorem{remark}{Remark}[lecture]
+
+% Proof environment (customized)
+\renewcommand{\proofname}{\textbf{Proof}}
+
+% ------------------------- Useful Math Shortcuts -------------------------
+\newcommand{\RR}{\mathbb{R}}      % Real numbers
+\newcommand{\NN}{\mathbb{N}}      % Natural numbers
+\newcommand{\ZZ}{\mathbb{Z}}      % Integers
+\newcommand{\QQ}{\mathbb{Q}}      % Rationals
+\newcommand{\CC}{\mathbb{C}}      % Complex numbers
+\newcommand{\PP}{\mathbb{P}}      % Probability
+\newcommand{\EE}{\mathbb{E}}      % Expectation
+\newcommand{\calF}{\mathcal{F}}   % Fourier transform / sigma-algebra, etc.
+
+% ------------------------- Document Begins -------------------------
+\begin{document}
+
+% ------------------------- Title Page (optional) -------------------------
+% Uncomment the next three lines if you want a separate title page
+\title{\coursename\ Notes}
+\author{\lecturer}
+\date{\today}
+\maketitle
+
+% ------------------------- Table of Contents -------------------------
+\tableofcontents
+\clearpage
+
+% ------------------------- First Lecture Example -------------------------
+\lecture{General Introduction to Digital Signal Processing}{(30min)}
+
+Opening remarks: The GW170817 sky map.
+
+Fundamental equation of data analysis (name is made up):
+\begin{equation}
+    d(t) = h(t) + n(t)
+\end{equation}
+where $n(t)$ is the random noise, $h(t)$ is the GW waveform we want to extract, and $d(t)$ is the data we have. Lectures since Day 1 deal with $h(t)$. Porcessing of $d(t)$ is called data analysis, which is the main topic of this course. It would lead to fruitful results, for example, the first detection of GWs in 2015. The following is extracted from https://arxiv.org/abs/1606.04856 and the references therein.
+
+\begin{itemize}
+    \item GW event list: ``GW150914 is detected with False Alarm Rate (FAR) of 1 per 203,000 years''.
+    \item Event Properties: ``GW150914 has component masses of 36$^{+5}_{-4} M_\odot$ and $29^{+4}_{-4} M_\odot$ at 90\% credible interval.
+    \item Testing GR: ``The mass of graviton $m_g$ is bounded to be $< 1.2 \times 10^{-22}$ eV/c$^2$ at 90\% confidence level''.
+    \item Event Rate: ``The rate of binary black hole mergers is estimated to be $2$-$57$ Gpc$^{-3}$ yr$^{-1}$''.
+\end{itemize}
+
+\begin{remark}
+    $h(t) = D^{ij} h_{ij}(t) = F_+ h_+(t) + F_\times h_\times(t)$ for LIGO, where $D^{ij}$ is the detector tensor, and $F_+, F_\times$ are the antenna pattern functions.
+
+    For L-shape interferometer: $D^{ij} = \dfrac{1}{2} (\hat{x}^i \hat{x}^j - \hat{y}^i \hat{y}^j)$, where $\hat{x}$ and $\hat{y}$ are the unit vectors along the two arms of the interferometer.
+
+    For bar detectors: $D^{ij} = \hat{u}^i \hat{u}^j$, where $\hat{u}$ is the unit vector along the bar.
+\end{remark}
+
+\begin{remark}
+    For a linear system, $\tilde h_\mathrm{out}(f) = T(f) \tilde h(f)$, where $T(f)$ is the transfer function of the system. 
+
+    Therefore,
+    \begin{equation}
+        \tilde d(f) = T(f) \tilde h(f) + T(f) \tilde n(f)
+    \end{equation}
+    \begin{equation}
+        T^{-1}(f) \tilde d(f) = \tilde h(f) + T^{-1}(f) \tilde n(f).
+    \end{equation}
+    \begin{equation}
+        d(t) = h(t) + n(t)
+    \end{equation}
+This is called calibration.
+\end{remark}
+
+Last but not least:
+\begin{remark}
+    $d(t)$ is a digitized discrete time series, which is a discrete sequence of data points. The sampling rate is typically 4096 Hz for LIGO, which means we have 4096 data points per second. (The total number of data points can be very large, especially for long-duration signals or high sampling rates, leading to challenges in data storage and processing.) 
+\end{remark}
+
+\begin{equation}
+    f_s = \frac{1}{\Delta t} \rightarrow d(t) = d(n \Delta t) = d[n] ~\mathrm{where}~n =0,1,2,...
+\end{equation}
+
+\begin{theorem}[Nyquist-Shannon Sampling Theorem]
+    A continuous signal can be completely reconstructed from its samples if $f_\mathrm{max} \leq \frac{f_s}{2}$, where $f_\mathrm{max}$ is the maximum frequency of the signal, and $f_s$ is the sampling rate.
+\end{theorem}
+
+\begin{example}
+    A high frequency signal can produce low frequency fake signal if under sampled called ``Aliasing''.
+
+    \begin{equation}
+        h(t) = \sin(2\pi 2t) \xrightarrow{f_s=3\mathrm{Hz}} h[n] = \sin(2\pi 2n/3) = \sin(2\pi 2n/3 - 2\pi n) = -\sin(2\pi n/3)
+    \end{equation}
+
+    1Hz fake signal!
+\end{example}
+
+\begin{example}
+    The wheel of a fast driving car can appear to rotate backwards if the frame rate of the camera is not high enough to capture the true motion of the wheel. This is a common example of aliasing in everyday life.
+\end{example}
+
+Therefore lowpass filter is used to remove high frequency components before downsampling. Take every one of the two data points, for example, to reduce the sampling rate by half is biased if not downsampling.
+
+\lecture{Probability and Statistics (Statistical Reasoning/Inference)}{}
+
+Probability is a measure of the likelihood that an event will occur. It is quantified as a number between 0 and 1, where 0 indicates an impossible event and 1 indicates a certain event. The probability of an event $A$ is denoted as $P(A)$.
+
+\begin{definition}[Kolmogorov axioms]
+    The probability measure $P$ on a sample space $\Omega$ satisfies the following axioms:
+    \begin{itemize}
+        \item NoN-negativity: $P(A) \geq 0$ for any event $A \subseteq \Omega$.
+        \item Normalization: $P(\Omega) = 1$.
+        \item Additivity: For any countable sequence of mutually exclusive events $A_1, A_2, A_3, ...$, we have $P\left(\bigcup_{i=1}^{\infty} A_i\right) = \sum_{i=1}^{\infty} P(A_i)$.
+    \end{itemize}
+
+\end{definition}
+
+% Example of inserting a figure (make sure you have a figure or replace the path)
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=0.5\textwidth]{example-image}
+%     \caption{An example figure.}
+%     \label{fig:example}
+% \end{figure}
+
+\begin{definition}[Random Variable]
+    A random variable is a function that assigns a real number to each outcome in a sample space $\Omega$. Formally, a random variable $X$ is a measurable function from $\Omega$ to $\RR$, i.e., $X: \Omega \rightarrow \RR$.
+\end{definition}
+
+$n(t)$ is a random variable.
+
+\begin{definition}[Conditional Probability]
+    The conditional probability of an event $A$ given an event $B$ is defined as:
+    \begin{equation}
+        P(A|B) = \frac{P(A \cap B)}{P(B)}
+    \end{equation}
+\end{definition}
+
+$A$ and $B$ are independent if $P(A|B) = P(A)$, which is equivalent to $P(A \cap B) = P(A)P(B)$. Maybe mention $P(A|B,C) = P(A\cap B|C) / P(B|C)$ if time allows.
+
+As a consequence of the definition of conditional probability, we have:
+\begin{corollary}[Total probability]
+    If $\{B_i\}$ is a partition of the sample space $\Omega$ (i.e., $B_i \cap B_j = \emptyset$ for $i \neq j$ and $\bigcup_i B_i = \Omega$), then for any event $A$, we have:
+    \begin{equation}
+        P(A) = \sum_i P(A|B_i) P(B_i)
+    \end{equation}
+\end{corollary}
+
+\begin{theorem}[Bayes' Theorem]
+    For any two events $A$ and $B$ with $P(B) > 0$, the conditional probability of $A$ given $B$ can be expressed as:
+    \begin{equation}
+        P(A|B) = \frac{P(B|A) P(A)}{P(B)}
+    \end{equation}
+\end{theorem}
+sometimes referred to as reverse probability formula. Writing it in terms of data and hypothesis, A = theory, B= data, we have:
+\begin{equation}
+    P(hypothesis|data) = \frac{P(data|hypothesis) P(hypothesis)}{P(data)}
+\end{equation}
+Hypothesis is just another name of theory, e.g., GR. It's such a simple and powerful formula that is widely used in many fields, including machine learning, statistics, and data analysis because the following Corollary.
+
+$P(data|hypothesis)$ is called likelihood, $P(hypothesis)$ is called prior, and $P(data)$ is called evidence.
+
+Hypothesis should be some parameterized model (with parameters $\theta$) that can predict some observables $d$, therefore the data analysis outcome for likelihood is $P(d|\theta, H)$, and for posterior is $P(\theta|d, H)$.
+
+\begin{theorem}[Rule of updated belief]
+    \begin{equation}
+ P(H|d_1,d_2) = \frac{P(d_1,d_2|H)p(H)}{P(d_1,d_2)} = \frac{P(d_2|H)P(d_1|H)p(H)}{P(d_1)P(d_2)} = \frac{P(d_2|H)P(H|d_1)}{P(d_2)}       
+    \end{equation}
+ \end{theorem}
+Used in my research Wang et al. https://arxiv.org/abs/2601.05734
+
+\subsection*{Frequentist and Bayesian Interpretations of Probability}
+There are two ways to interpret the meanings of the probability. In the frequetist interpretation, the probability of an event is defined as the limit of its relative frequency in a large number of trials. A typical example is tossing a coin and counting the frequency of results getting head and tail. 
+In the Bayesian interpretation, the probability of an event is a measure of our degree of belief in that event, which can be updated as we acquire new evidence.
+
+Given an observation value $x_\mathrm{obs}$, assuming the true value is $x_t$, frequentists focus on $P(x_\mathrm{obs}|x_t)$ while Bayesian focus on $P(x_t|x_\mathrm{obs})$. Both agrees on the likelihood function, say, a Gaussian distribution:
+\begin{equation}
+    P(x_\mathrm{obs}|x_t) = \frac{1}{\sqrt{2\pi}\sigma} \exp\left(-\frac{(x_\mathrm{obs}-x_t)^2}{2\sigma^2}\right)
+\end{equation}
+where $\sigma=1$.
+The frequentist confidence interval is defined as the interval $[x_1, x_2]$ such that $P(x_1 < x_\mathrm{obs} < x_2) = 0.95$ for a 95\% confidence level. The Bayesian credible interval is defined as the interval $[x_1, x_2]$ such that $P(x_1 < x_t < x_2 | x_\mathrm{obs}) = 0.95$ for a 95\% credible level. 
+
+\begin{remark}
+    May look confusing but they're different ways to think about the same thing. A thumb of rule is: if it is a repetitive experiment, e.g., tossing a coin, the frequentist approach is more natural; if it is an one-off event, e.g., the first detection of GWs, the Bayesian approach is more natural. Hence, Frequentist approach is more commonly used in particle physics, while Bayesian approach is more commonly used in astrophysics and cosmology. In practice, be pragmatic.
+\end{remark}
+
+\begin{remark}
+    Status quo: In GW astronomy, use Bayesian for parameter estimation, and use frequentist for hypothesis testing (i.e., signal detection). Reasons for the latter is probably we don't have enough computation power to get the Bayes evidence.
+\end{remark}
+
+From now on we will focus on Bayesian and apply it to GW parameter estimation.
+
+\subsection*{Likelihood for GW parameter estimation}
+
+The likelihood for GW parameter estimation is called Whittle Likelihood, it's derived from the wide-sense stationary Gaussian Process. A stationary process is a stochastic process whose statistical properties, such as mean and variance, do not change over time. Wide-sense (or weak-sense) stationary random process requires that 1st moment (i.e. the mean) and autocovariance do not vary with respect to time and that the 2nd moment is finite for all times.
+
+A multi-variable Gaussian distribution is given by:
+\begin{equation}
+    P(\mathbf{n}) = \frac{1}{(2\pi)^{n/2} |\Sigma|^{1/2}} \exp\left(-\frac{1}{2} (\mathbf{n}-\boldsymbol{\mu})^T \Sigma^{-1} (\mathbf{n}-\boldsymbol{\mu})\right)
+\end{equation}
+where $\mathbf{n}$ is an $n$-dimensional random vector, $\boldsymbol{\mu}$ is the mean vector, and $\Sigma$ is the covariance matrix. Approximate $n(t)$ as a stationary Gaussian random process with zero mean, which is a good approximation for LIGO noise. 
+
+For a stationary Gaussian random process, the covariance matrix is Toeplitz, which means that the covariance between two points depends only on the time difference between them. Writing it down in a discrete form:
+\begin{equation}
+    \Sigma_{ij} = \mathrm{Cov}(n_i, n_j) = \mathrm{Cov}(n(t_i), n(t_j)) = \mathrm{Cov}(n(t_i - t_j), n(0)) = \Sigma(t_i - t_j)
+\end{equation}
+
+\begin{equation}
+    \Sigma = \begin{bmatrix}
+        \Sigma(0) & \Sigma(\Delta t) & \Sigma(2\Delta t) & \cdots & \Sigma((N-1)\Delta t) \\
+        \Sigma(-\Delta t) & \Sigma(0) & \Sigma(\Delta t) & \cdots & \Sigma((N-2)\Delta t) \\
+        \Sigma(-2\Delta t) & \Sigma(-\Delta t) & \Sigma(0) & \cdots & \Sigma((N-3)\Delta t) \\
+        \vdots & \vdots & \vdots & \ddots & \vdots \\
+        \Sigma(-(N-1)\Delta t) & \Sigma(-(N-2)\Delta t) & \Sigma(-(N-3)\Delta t) & \cdots & \Sigma(0)
+    \end{bmatrix}
+\end{equation}
+
+\begin{definition}
+    In linear algebra, a Toeplitz matrix or diagonal-constant matrix, named after Otto Toeplitz, is a matrix in which each descending diagonal from left to right is constant.
+\end{definition}
+
+If the autocorrelation function goes to zero in some finite time $\tau_{\text{max}}$, then all diagonals of $\Sigma[M\Delta t]$ with $M > \Delta_{\text{max}} \equiv \lfloor \tau_{\text{max}} / \Delta t \rfloor$ will be zero. In this case, $\Sigma$ is asymptotically similar to a circulant matrix.
+
+\begin{equation}
+    \mathbf{C} = \begin{pmatrix}
+    c_0 & c_1 & c_2 & \cdots & c_{N-1} \\
+    c_{N-1} & c_0 & c_1 & \cdots & c_{N-2} \\
+    c_{N-2} & c_{N-1} & c_0 & \cdots & c_{N-3} \\
+    \vdots & \vdots & \vdots & \ddots & \vdots \\
+    c_1 & c_2 & c_3 & \cdots & c_0
+    \end{pmatrix},
+\end{equation}
+where $c_n = \Sigma(n \Delta t)$ for $n = 0, 1, ..., M-1$, and determined by symmetry when $n \geq M$. Indeed, in the limit $N\rightarrow\infty$, C asymptotes to $\Sigma$ as long as the autocorrelation function goes to zero in finite time $\tau_\mathrm{max}$.
+
+\begin{theorem}[Diagonalization of Circulant Matrices]
+    Let $\mathbf{C}$ be an $n \times n$ circulant matrix of the form
+    \[
+    \mathbf{C} = \begin{pmatrix}
+    c_0 & c_1 & c_2 & \cdots & c_{N-1} \\
+    c_{N-1} & c_0 & c_1 & \cdots & c_{N-2} \\
+    c_{N-2} & c_{N-1} & c_0 & \cdots & c_{N-3} \\
+    \vdots & \vdots & \vdots & \ddots & \vdots \\
+    c_1 & c_2 & c_3 & \cdots & c_0
+    \end{pmatrix},
+    \]
+    where each row is a cyclic shift of the first row $(c_0, c_1, \dots, c_{N-1})$. 
+    Define the Fourier matrix $\mathbf{F}$ with entries
+    \[
+    \mathbf{F}_{jk} = \frac{1}{\sqrt{n}} \, e^{2\pi i jk / N}, \qquad j,k = 0,1,\dots,N-1.
+    \]
+    Then $\mathbf{C}$ is diagonalized by $\mathbf{F}$:
+    \[
+    \mathbf{C} = \mathbf{F}^* \mathbf{\Lambda} \mathbf{F},
+    \]
+    where $\mathbf{F}^*$ is the conjugate transpose of $\mathbf{F}$, and $\mathbf{\Lambda} = \operatorname{diag}(\lambda_0, \lambda_1, \dots, \lambda_{N-1})$ is a diagonal matrix whose entries are the eigenvalues of $\mathbf{C}$. The eigenvalues are given by the discrete Fourier transform of the first row:
+    \[
+    \lambda_k = \sum_{j=0}^{N-1} c_j \, e^{-2\pi i jk / n}, \qquad k = 0,1,\dots,N-1.
+    \]
+    Equivalently, the eigenvectors of $\mathbf{C}$ are the Fourier basis vectors
+    \[
+    \mathbf{v}_k = \frac{1}{\sqrt{n}} \big(1, e^{2\pi i k/n}, e^{4\pi i k/n}, \dots, e^{2\pi i (N-1)k/n} \big)^\top,
+    \]
+    with corresponding eigenvalues $\lambda_k$.
+    \end{theorem}
+
+\begin{theorem}[Wiener-Khinchin]
+    Let $\{X_t\}$ be a wide-sense stationary stochastic process with zero mean and autocorrelation function
+    \[
+    R(\tau) = \mathbb{E}[X_t X_{t+\tau}],
+    \]
+    which depends only on the time lag $\tau$. Assume that $R(\tau)$ is absolutely integrable, i.e., $\int_{-\infty}^{\infty} |R(\tau)| \, d\tau < \infty$. Then the power spectral density (PSD) of the process, denoted $S(f)$, exists and is given by the Fourier transform of $R(\tau)$:
+    \[
+    S(f) = \int_{-\infty}^{\infty} R(\tau) \, e^{-2\pi i f \tau} \, d\tau.
+    \]
+    Conversely, the autocorrelation function can be recovered via the inverse Fourier transform:
+    \[
+    R(\tau) = \int_{-\infty}^{\infty} S(f) \, e^{2\pi i f \tau} \, df.
+    \]
+    For a discrete-time stationary process $\{X_n\}$ with autocorrelation $R[k] = \mathbb{E}[X_n X_{n+k}]$, the PSD is defined as the discrete-time Fourier transform:
+    \[
+    S(f) = \sum_{k=-\infty}^{\infty} R[k] \, e^{-2\pi i f k \Delta t},
+    \]
+    where $\Delta t$ is the sampling interval. In the context of noise analysis, $S_n(f)$ denotes the one-sided power spectral density (defined for $f \ge 0$) such that the total power is $\int_0^\infty S_n(f) \, df = R(0)$.
+    \end{theorem}
+    
+    \begin{remark}
+    For real-valued processes, $R(\tau)$ is even and $S(f)$ is real and even (two-sided spectrum). In physical applications, it is common to work with the one-sided PSD $S_n(f) = 2S(f)$ for $f > 0$, which represents the power contributed by positive frequencies only.
+    \end{remark}
+
+As a consequence, the likelihood can be written in the frequency domain as:
+\[
+\mathcal{L}(\tilde{\mathbf{n}}(f)|\theta) = \frac{1}{(2\pi)^{N/2} |\boldsymbol{\Sigma}|^{1/2}} 
+\exp\left( -\frac{1}{2} \langle \tilde{\mathbf{n}}, \tilde{\mathbf{n}} \rangle \right),
+\]
+where the inner product $\langle \cdot, \cdot \rangle$ is defined in the frequency domain as
+\[
+\langle \tilde{a}, \tilde{b} \rangle = 4 \Re \left[ \int_{0}^{\infty} \frac{\tilde{a}^*(f) \tilde{b}(f)}{S_n(f)} \, df \right],
+\]
+or, for discrete frequencies $f_j$ ($j = 0, \dots, N/2-1$),
+\[
+\langle \tilde{a}, \tilde{b} \rangle = 4 \Re \left[ \Delta f \sum_{j=0}^{N/2-1} \frac{\tilde{a}^*[j] \tilde{b}[j]}{S_n(f_j)} \right],
+\]
+with $\Delta f = 1/(N \Delta t)$ the frequency resolution and $\Re$ denoting the real part.
+
+Since noise is just data subtracting the signal, the likelihood can be written as:
+\begin{equation}
+    \mathcal{L}(\tilde d|\theta) \propto \exp\left(-\frac{1}{2} \langle \tilde d - \tilde h(\theta), \tilde d - \tilde h(\theta) \rangle\right)
+\end{equation}
+Or 
+\begin{equation}
+    \log \mathcal{L}(\tilde d|\theta) = -\frac{1}{2} \langle \tilde d - \tilde h(\theta), \tilde d - \tilde h(\theta) \rangle + \text{const}
+\end{equation}
+
+For multiple detectors, the likelihood is the product of the likelihoods for each detector, assuming the noise in different detectors is independent.
+
+Let's write down the Bayesian formula for parameter estimation again:
+\begin{equation}
+    P(\theta|d) = \frac{\mathcal{L}(d|\theta) \pi(\theta)}{\mathcal{Z}(d)}
+\end{equation}
+where $\pi(\theta)$ is the prior distribution of the parameters, which encodes our knowledge about the parameters before observing the data. $P(d)$ is the evidence, which is a normalization factor that ensures the posterior distribution integrates to 1. It can be computed by integrating the numerator over all possible values of $\theta$:
+\begin{equation}
+    \mathcal{Z}(d) = \int \mathcal{L}(d|\theta) \pi(\theta) d\theta
+\end{equation}
+
+\subsection*{Computing the likelihood, sampling method}
+
+The likelihood is usually a function of many parameters, as many as 15 parameters for binary black hole mergers. In such a high dimensional parameter space, it is impossible to compute the likelihood on a grid. Instead, we use sampling methods, such as Markov Chain Monte Carlo (MCMC) or Nested Sampling, to explore the parameter space and estimate the posterior distribution of the parameters given the data.
+
+For more details, check afternoon's exercise class.
+
+\subsection*{Posteriror distribution, marginal distribution, and credible interval}
+
+\begin{definition}[Marginal distrubtion]
+    P($\theta_i$) = $\int P(\theta_1, \theta_2, ..., \theta_n) d\theta_1 ... d\theta_{i-1} d\theta_{i+1} ... d\theta_n$
+\end{definition}
+
+The credible interval is a range of values for a parameter that contains a certain percentage of the posterior distribution, e.g., 95\% credible interval means that there is a 95\% probability that the true value of the parameter lies within that interval.
+GW parameter estimation is reported as median + (95 percentile - median) - (median - 5 percentile) such that the range covers 90\% credible interval.
+
+Corner plots are commonly used to visualize the posterior distribution of parameters in a multi-dimensional parameter space. They show the marginalized distributions for each parameter along the diagonal and the joint distributions for pairs of parameters in the off-diagonal plots.
+
+\subsection*{Bayesian Model Selection}
+
+We can compare the goodness of two models by computing their Bayes factor. For examples, compare GR and a modified Gravitational theory.
+
+\begin{equation}
+    \mathcal{O}^{1}_{2} = \frac{P(H_1|d)}{P(H_2|d)} = \frac{P(d|H_1) P(H_1)}{P(d|H_2) P(H_2)} = \frac{\mathcal{Z}_1 P(H_1)}{\mathcal{Z}_2 P(H_2)}
+\end{equation}
+$Z_1/Z_2$ is called the Bayes factor, $P(H_1)/P(H_2)$ is called prior odds, and $\mathcal{O}^1_2$ is called odds ratio. 
+
+\begin{remark}[Occam's Razor]
+    Entities must not be multiplied beyond necessity.
+\end{remark}
+
+\begin{example}
+    Fitting three points using a straight line or a parabola or polynomials.
+\end{example}
+
+Bayes factor automatically penalizes models with more parameters.
+
+\begin{theorem}[Savage-Dickey Density Ratio]
+    Consider two competing models $H_0$ and $H_1$, they're nested models in the sense that $H_1 \rightarrow H_0$ when $\theta = \theta_0$. Then the Bayes factor is 
+    \begin{equation}
+    \frac{P(d|H_0)}{P(d|H_1)} = \frac{P(\theta=\theta_0|d, H_1)}{P(\theta=\theta_0|H_1)}. \tag{1}
+    \end{equation}
+\end{theorem}
+    
+\begin{proof}
+    \begin{equation}
+        left = \frac{P(d|H_0)}{P(d|H_1)} = \frac{P(d|H_1, \theta=\theta_0)}{P(d|H1)} = \frac{\frac{P(\theta=\theta_0|d, H_1)P(d|H_1)}{P(\theta=\theta_0|H_1)}}{P(d|H_1)} = right\tag{2}
+    \end{equation}
+\end{proof}
+
+Consistent with intuition that $H_0$ is totally excluded if $\theta_0$ is excluded. The Occam Razor is represented by the prior volume at the cost of introducing one more parameters.
+
+\begin{example}
+    Massive graviton
+\end{example}
+
+\subsection*{Maximum likelihood and Fisher Information Matrix}
+The log likelihood can be written as:
+\[  \log \mathcal{L}(d|\theta) = -\frac{1}{2} \langle d - h(\theta), d - h(\theta) \rangle + \text{const} = \langle d, h(\theta) \rangle -\frac{1}{2} \langle h(\theta), h(\theta) \rangle + \text{const} \tag{3}
+    \]
+if the prior is flat, the maximizing posterior becomes the same as maximizing likelihood.
+
+\begin{equation}
+    \frac{\partial \log \mathcal{L}}{\partial \theta_i} = 0
+\end{equation}
+
+\begin{equation}
+    \langle d, \frac{\partial h}{\partial \theta_i} \rangle - \langle h, \frac{\partial h}{\partial \theta_i} \rangle = 0
+\end{equation}
+
+An elegant geometric interpretation for this equation: all the functions of $h(\theta)$ form the signal manifold. Adding noise to $h(\theta)$ brings us outside of the signal manifold, but we are looking for the closet point on the signal manifold to the data, which is equivalent to projecting the data onto the signal manifold. The projection is orthogonal, which means that the inner product between the noise and the tangent vector of the signal manifold is zero, i.e., 
+\begin{equation}
+    \langle d-h, \frac{\partial h}{\partial \theta_i} \rangle = 0
+\end{equation}
+
+Fisher information matrix is used to estimate the parameter estimation uncertain in the limit of high signal-to-noise ratio.
+
+In linear signal approximation, expand $h(\theta)$ around the maxL value $\theta_{MLE}$:
+\begin{equation}
+    h(\theta) \approx h(\theta_{MLE}) + \sum_i \frac{\partial h}{\partial \theta_i} (\theta_i - \theta_{MLE,i}) + ...
+\end{equation}
+Therefore
+\begin{align}
+    \langle d-h(\theta), d-h(\theta) \rangle  \approx \langle d - h(\theta_{MLE}), d - h(\theta_{MLE})\rangle - 2 \sum \langle d-h(\theta_{MLE}), \frac{\partial h}{\partial \theta_i} \rangle (\theta_i - \theta_{MLE,i}) \\ \nonumber
+    + \sum_{ij} \langle \frac{\partial h}{\partial \theta_j}, \frac{\partial h}{\partial \theta_i} \rangle (\theta_i - \theta_{MLE,i})(\theta_j - \theta_{MLE,j}) + ...
+\end{align}
+
+\begin{equation}
+\log \mathcal{L}(\theta) \approx -\frac{1}{2}\Gamma_{ij} \delta \theta_i \delta \theta_j
+\end{equation}
+This is a Gaussian distribution with respect to $\theta$ with covariance function $\Gamma_{ij}^{-1}$. Therefore, the standard deviation of $\theta_i$ is $\sigma_i = \sqrt{\Gamma_{ii}^{-1}}$ and the linear correlation is $\Gamma_{ij}^{-1} / (\sigma_i \sigma_j)$.
+
+\lecture{Signal detection, matched filtering}{}
+
+From now on we introduce the main tool of signal detection, matched-filtering. It is the optimal linear filter for maximizing the signal-to-noise ratio (SNR) with known waveforms in the presence of additive stationary Gaussian noise. 
+The idea is to correlate the observed data with a template waveform that matches the expected signal shape, which allows us to extract the signal from the noise.
+
+\subsection*{Spectral analysis of noise}
+Without loss of generality
+\begin{equation}
+    \langle n(t) \rangle = 0
+\end{equation}
+
+and 
+\begin{equation}
+    \langle \tilde{n}^\ast(f) \tilde{n}(f') \rangle = \frac{1}{2} S_n(f) \delta(f-f')
+\end{equation}
+
+\begin{remark}
+    $S_n (-f) = S_n(f)$ for real-valued noise.
+\end{remark}
+
+\begin{remark}
+    Ensemble average = time average for stationary processes.
+\end{remark}
+
+Welch method to estimate the PSD: divide the data into overlapping segments, compute the periodogram for each segment, and then average the periodograms to reduce the variance of the estimate.
+pros: easy to implement, cons: lose frequency resolution
+
+\begin{remark}
+    stationary $\rightarrow \delta(f-f')$
+\end{remark}
+
+\begin{theorem}[Wiener-Khinchin]
+    \[ 
+        R(\tau) = \langle n(t+\tau)n(t)\rangle = 
+        \int_{-\infty}^{\infty} \langle \tilde{n}(f) e^{2\pi i f (\tau+t)} df \tilde{n}^\ast(f') e^{-2\pi i f' t} df' \rangle = \int_{-\infty}^{\infty} \frac{1}{2}S_n(f) e^{2\pi i f \tau} df
+    \]
+\end{theorem}
+The autocorrelation function $R(\tau)$ and the power spectral density $S_n(f)$ are Fourier transform pairs. The PSD describes how the power of a signal or time series is distributed across different frequency components, while the autocorrelation function describes how the values of the signal at different times are correlated with each other.
+
+when $\tau=0$
+\begin{equation}
+    R(0) = \langle n(t)^2 \rangle = \int_{-\infty}^{\infty} \frac{1}{2} S_n(f) df
+\end{equation}
+
+
+\subsection*{Matched-filtering}
+Hand-waving way to interpret:
+$s(t) = h(t) + n(t)$
+
+\begin{equation}
+    \frac{1}{T} \int_{0}^{T} s(t) h(t) dt = \frac{1}{T} \int_{0}^{T} h(t)^2 dt + \frac{1}{T} \int_{0}^{T} n(t) h(t) dt \rightarrow h_0^2  > \left(\frac{\tau_0}{T}\right)^{1/2} h_0 n_0
+\end{equation}
+where $h_0$ is the amplitude of the signal, $n_0$ is the amplitude of the noise, and $\tau_0$ is the correlation time of the noise and signal. Therefore, we can detect the signal if $h_0 > \left(\frac{\tau_0}{T}\right)^{1/2} n_0$. The longer we observe, the smaller the signal we can detect.
+
+For $\tau_0 = 1e-3$ s, $n_0 = 1e-21$, and $T = 1$ year, we can detect a signal with amplitude as small as $h_0 \sim 10^{-26}$.
+
+Define 
+\begin{equation}
+    \hat{s} = \int_{-\infty}^{\infty}dt s(t) K(t)
+\end{equation}
+where $K(t)$ is the filter function. The SNR is defined as
+\begin{equation}
+    S = \int_{-\infty}^{\infty} dt h(t) K(t) = \int_{-\infty}^{\infty} df \tilde{h}(f) \hat{K}^\ast(f)
+\end{equation}
+
+\begin{align}
+    N^2= \langle \hat{s}^2 \rangle|_{h=0} =  \int_{-\infty}^{\infty} dt \int_{-\infty}^{\infty} dt' K(t) K(t') \langle n(t) n(t') \rangle = \\ \nonumber
+    \int_{-\infty}^{\infty} dt dt'K(t) K(t') \int_{-\infty}^{\infty} df df'e^{2\pi ift - 2\pi if't' }\langle \hat{n}^\ast(f)\hat{n}(f') \rangle =  \\ \nonumber
+    \int_{-\infty}^{\infty}df \frac{1}{2} S_n(f) |\hat{K}(f)|^2
+\end{align}
+
+Therefore
+\begin{equation}
+    \frac{S}{N} = \frac{\int_{-\infty}^{\infty} df \tilde{h}(f) \hat{K}^\ast(f)}{\sqrt{\int_{-\infty}^{\infty} df \frac{1}{2} S_n(f) |\hat{K}(f)|^2}}
+\end{equation}
+
+Define the inner product
+\begin{equation}
+    \langle a, b \rangle = 4 \Re \left[ \int_{0}^{\infty} \frac{\tilde{a}^\ast(f) \tilde{b}(f)}{S_n(f)} df \right]
+\end{equation}
+The SNR can be written as
+\begin{equation}
+    \frac{S}{N} = \frac{\langle h, K \rangle}{\sqrt{\langle K, K \rangle}}
+\end{equation}
+The Cauchy-Schwarz inequality states that for any vectors $a$ and $b$ in an inner product space, the following inequality holds:
+\begin{equation}
+    |\langle a, b \rangle| \leq \sqrt{\langle a, a \rangle} \sqrt{\langle b, b \rangle}
+\end{equation}
+Applying this to our case, we have
+\begin{equation}
+    \frac{S}{N} = \frac{\langle h, K \rangle}{\sqrt{\langle K, K \rangle}} \leq \sqrt{\langle h, h \rangle}
+\end{equation}
+The equality holds when $K$ is proportional to $h$, i.e., $K = \alpha h$ for some constant $\alpha$. Therefore, the optimal filter that maximizes the SNR is given by
+\begin{equation}
+    \hat{K}(f) = \alpha \frac{\tilde{h}(f)}{S_n(f)}
+\end{equation}
+
+\subsection*{Relation to maximum likelihood estimation}
+The matched-filtering SNR can be related to the maximum likelihood estimation of the signal parameters. The likelihood function for a signal $h(\theta)$ in the presence of noise $n$ is given by
+\begin{equation}
+    \mathcal{L}(\theta) = P(d|h(\theta)) \propto \exp\left(-\frac{1}{2} \langle d - h(\theta), d - h(\theta) \rangle\right)
+\end{equation}
+
+Maximizing the likelihood is equivalent to minimizing the inner product $\langle d - h(\theta), d - h(\theta) \rangle$. The matched-filtering SNR can be expressed in terms of the likelihood as
+\begin{equation}
+    \frac{S}{N} = \sqrt{2 \log \mathcal{L}(\theta) + \text{const}}      
+\end{equation}
+
+\begin{remark}
+    Optimal SNR = 4 Re$\int_0^\infty \frac{|\tilde{h}(f)|^2}{S_n(f)} df$. This is the SNR we get when we know the true parameters of the signal. In practice, we don't know the true parameters, so we have to search over a template bank of possible waveforms, which leads to a reduction in the effective SNR due to the mismatch between the true signal and the templates.
+\end{remark}
+
+\subsection*{Hypothesis Testing and Neymann-Pearson lemma}
+Hypothesis testing is a statistical method used to decide between two competing hypotheses based on observed data. In the context of signal detection, we often want to test the null hypothesis $H_0$ (no signal, only noise) against the alternative hypothesis $H_1$ (signal present).
+
+\begin{itemize}
+    \item $H_0$: $d = n$ (data is just noise)
+    \item $H_1$: $d = h(\theta) + n$ (data is signal plus noise)
+\end{itemize}
+
+The Neymann-Pearson lemma states that for a given significance level $\alpha$, the most powerful test for distinguishing between two simple hypotheses $H_0$ and $H_1$ is the likelihood ratio test, which rejects $H_0$ in favor of $H_1$ if the likelihood ratio $\Lambda(d) = \frac{P(d|H_1)}{P(d|H_0)}$ exceeds a certain threshold $\eta$. The threshold $\eta$ is chosen such that the probability of a Type I error (rejecting $H_0$ when it is true) is equal to $\alpha$.
+
+\subsection*{Search for GW signals}
+In long term, the noise is not Gaussian, they're called glitches. In practice, we build a large template bank of waveforms that cover the parameter space of interest, and then we compute the matched-filtering SNR for each template against the observed data. We set a threshold on the SNR to identify candidate events, and then we perform further analysis to determine whether these candidates are consistent with being true GW signals or are likely to be noise artifacts. Such as chi-square discriminators. The coincidences are formed from at least two detectors. Time shift is used to construct background distribution. The false alarm rate (FAR) is estimated from the background distribution, and we set a threshold on FAR to claim a detection, such as 1/100 years.
+
+\end{document}
