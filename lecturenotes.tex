@@ -616,4 +616,46 @@ The Neymann-Pearson lemma states that for a given significance level $\alpha$, t
 \subsection*{Search for GW signals}
 In long term, the noise is not Gaussian, they're called glitches. In practice, we build a large template bank of waveforms that cover the parameter space of interest, and then we compute the matched-filtering SNR for each template against the observed data. We set a threshold on the SNR to identify candidate events, and then we perform further analysis to determine whether these candidates are consistent with being true GW signals or are likely to be noise artifacts. Such as chi-square discriminators. The coincidences are formed from at least two detectors. Time shift is used to construct background distribution. The false alarm rate (FAR) is estimated from the background distribution, and we set a threshold on FAR to claim a detection, such as 1/100 years.
 
+\subsection*{$\chi^2$ distribution}
+Suppose we haeve two independent random variables $X$ and $Y$ that are normally distributed with mean 0 and variance 1, i.e., $X \sim N(0,1)$ and $Y \sim N(0,1)$. Then the random variable defined as
+\begin{equation}
+    Z = X^2 + Y^2
+\end{equation}
+follows a chi-square distribution with 2 degrees of freedom, denoted as $Z \sim \chi^2(2)$. The probability density function (PDF) of a chi-square distribution with $k$ degrees of freedom is given by
+\begin{equation}
+    f(z; k) = \frac{1}{2^{k/2} \Gamma(k/2)} z^{(k/2)-1} e^{-z/2}, \quad z > 0
+\end{equation}
+where $\Gamma$ is the gamma function. In our case, with $k=2$, the PDF simplifies to
+\begin{equation}
+    f(z; 2) = \frac{1}{2} e^{-z/2}, \quad z > 0
+\end{equation}
+The mean and variance of a chi-square distribution with $k$ degrees of freedom are given by
+\begin{equation}
+    \text{Mean} = k, \quad \text{Variance} = 2k
+\end{equation}
+The reduced chi-square statistic is defined as
+\begin{equation}
+    \chi^2_{\text{red}} = \frac{\chi^2}{k}
+\end{equation}
+where $k$ is the number of degrees of freedom. For a good fit, we expect $\chi^2_{\text{red}} \approx 1$. If $\chi^2_{\text{red}} \gg 1$, it suggests that the model does not fit the data well, while if $\chi^2_{\text{red}} \ll 1$, it may indicate that the model is overfitting the data.
+
+Empirical way to construct a new-SNR to discriminate glitches from gravitational-wave real signals:
+\begin{equation}
+    \rho_{\text{new}} = \begin{cases}
+    \rho, & \text{if } \chi^2_{\text{red}} \leq 1 \\
+    \frac{\rho}{\left[ (1 + (\chi^2_{\text{red}})^3) / 2 \right]^{1/6}}, & \text{if } \chi^2_{\text{red}} > 1
+    \end{cases}
+\end{equation}
+
+\subsection*{P-value and False Alarm Rate}
+The p-value is the probability of obtaining a test statistic at least as extreme as the one observed, assuming that the null hypothesis is true. In the context of signal detection, it represents the probability of observing a signal-like event due to random noise fluctuations alone.
+The false alarm rate (FAR) is the expected number of false positives (incorrectly identifying noise as a signal) per unit time. It can be estimated by analyzing the background noise and determining how often noise events exceed a certain threshold.
+
+In gravitational wave, we time shift the data from different detectors to create a background distribution of noise events, which allows us to estimate the FAR for candidate events. A common threshold for claiming a detection is a FAR of less than 1 per 100 years, which corresponds to a very low probability of a false positive.
+
+
+
+
+
+
 \end{document}
